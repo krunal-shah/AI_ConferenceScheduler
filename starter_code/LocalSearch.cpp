@@ -1,13 +1,13 @@
 /* 
- * File:   SessionOrganizer.cpp
+ * File:   LocalSearch.cpp
  * Author: Kapil Thakkar
  * 
  */
 
-#include "SessionOrganizer.h"
+#include "LocalSearch.h"
 #include "Util.h"
 
-SessionOrganizer::SessionOrganizer ( )
+LocalSearch::LocalSearch ( )
 {
     parallelTracks = 0;
     papersInSession = 0;
@@ -16,13 +16,13 @@ SessionOrganizer::SessionOrganizer ( )
     tradeoffCoefficient = 1.0;
 }
 
-SessionOrganizer::SessionOrganizer ( string filename )
+LocalSearch::LocalSearch ( string filename )
 {
     readInInputFile ( filename );
     conference = new Conference ( parallelTracks, sessionsInTrack, papersInSession );
 }
 
-void SessionOrganizer::organizePapers ( )
+void LocalSearch::organizePapers ( )
 {
     int paperCounter = 0;
     for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
@@ -38,7 +38,7 @@ void SessionOrganizer::organizePapers ( )
     }
 }
 
-void SessionOrganizer::readInInputFile ( string filename )
+void LocalSearch::readInInputFile ( string filename )
 {
     vector<string> lines;
     string line;
@@ -100,17 +100,17 @@ void SessionOrganizer::readInInputFile ( string filename )
     }
 }
 
-double** SessionOrganizer::getDistanceMatrix ( )
+double** LocalSearch::getDistanceMatrix ( )
 {
     return distanceMatrix;
 }
 
-void SessionOrganizer::printSessionOrganiser ( char * filename)
+void LocalSearch::printSessionOrganiser ( char * filename)
 {
     conference->printConference ( filename);
 }
 
-double SessionOrganizer::scoreOrganization ( )
+double LocalSearch::scoreOrganization ( )
 {
     // Sum of pairwise similarities per session.
     double score1 = 0.0;

@@ -16,6 +16,7 @@
 #include "Conference.h"
 #include "Track.h"
 #include "Session.h"
+#include "LocalSearch.h"
 
 using namespace std;
 
@@ -39,6 +40,9 @@ private:
 
     double processingTimeInMinutes ;
     double tradeoffCoefficient ; // the tradeoff coefficient
+
+    // Search object
+    LocalSearch *search;
 
 
 public:

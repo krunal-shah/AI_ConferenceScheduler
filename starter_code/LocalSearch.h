@@ -4,6 +4,9 @@
  *
  */
 
+#ifndef LOCALSEARC_H
+#define LOCALSEARC_H
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -44,12 +47,37 @@ public:
     
     
     /**
+     * Read in the number of parallel tracks, papers in session, sessions
+     * in a track, and the similarity matrix from the specified filename.
+     * @param filename is the name of the file containing the matrix.
+     * @return the similarity matrix.
+     */
+    void readInInputFile(string filename);
+    
+    
+    
+    /**
      * Organize the papers according to some algorithm.
      */
-    void initializeStartState();
-
-    void printLocalSearch(char *);
+    void organizePapers();
+    
+    
+    /**
+     * Get the distance matrix.
+     * @return the distance matrix.
+     */
+    double** getDistanceMatrix();
+    
+    
+    /**
+     * Score the organization.
+     * @return the score.
+     */
+    double scoreOrganization();
+    
+    
+    void printSessionOrganiser(char *);
 };
 
-#endif  /* SESSIONORGANIZER_H */
+#endif  /* LOCALSEARC_H */
 

@@ -18,24 +18,24 @@ SessionOrganizer::SessionOrganizer ( )
 
 SessionOrganizer::SessionOrganizer ( string filename )
 {
-    readInInputFile ( filename );
-    conference = new Conference ( parallelTracks, sessionsInTrack, papersInSession );
+    search = new LocalSearch( filename );
 }
 
 void SessionOrganizer::organizePapers ( )
 {
-    int paperCounter = 0;
-    for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
-    {
-        for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
-        {
-            for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
-            {
-                conference->setPaper ( j, i, k, paperCounter );
-                paperCounter++;
-            }
-        }
-    }
+    search->organizePapers();
+    // int paperCounter = 0;
+    // for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
+    // {
+    //     for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
+    //     {
+    //         for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
+    //         {
+    //             conference->setPaper ( j, i, k, paperCounter );
+    //             paperCounter++;
+    //         }
+    //     }
+    // }
 }
 
 void SessionOrganizer::readInInputFile ( string filename )
@@ -102,16 +102,19 @@ void SessionOrganizer::readInInputFile ( string filename )
 
 double** SessionOrganizer::getDistanceMatrix ( )
 {
-    return distanceMatrix;
+    return search->getDistanceMatrix();
+    // return distanceMatrix;
 }
 
 void SessionOrganizer::printSessionOrganiser ( char * filename)
 {
-    conference->printConference ( filename);
+    search->printSessionOrganiser(filename);
+    // conference->printConference ( filename);
 }
 
 double SessionOrganizer::scoreOrganization ( )
 {
+    return search->scoreOrganization();
     // Sum of pairwise similarities per session.
     double score1 = 0.0;
     for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
