@@ -29,6 +29,7 @@ void Track::setPaper ( int sessionIndex, int paperIndex, int paperId )
     else
     {
         cout << "Index out of bound - Track::setPaper" << endl;
+		system("pause");
         exit ( 0 );
     }
 }

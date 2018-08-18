@@ -91,11 +91,12 @@ void Conference::setPaper ( int trackIndex, int sessionIndex, int paperIndex, in
     if ( this->parallelTracks > trackIndex )
     {
         Track curTrack = tracks[trackIndex];
-        curTrack.setPaper ( sessionIndex, paperIndex, paperId );
+		curTrack.setPaper ( sessionIndex, paperIndex, paperId );
     }
     else
     {
         cout << "Index out of bound - Conference::setPaper" << endl;
+		system("pause");
         exit ( 0 );
     }
 }

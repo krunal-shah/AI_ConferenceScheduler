@@ -6,6 +6,8 @@
 
 #include "LocalSearch.h"
 #include "Util.h"
+#include <time.h>       /* time */
+
 
 LocalSearch::LocalSearch ( )
 {
@@ -22,6 +24,16 @@ LocalSearch::LocalSearch ( string filename )
     conference = new Conference ( parallelTracks, sessionsInTrack, papersInSession );
 }
 
+void printMap(vector<pair<int, double>> tmap)
+{
+	for (auto&elem : tmap)
+	{
+		cout << elem.first << " " << elem.second << endl;
+	}
+	cout << "end of map printing\n";
+}
+
+
 void LocalSearch::organizePapers ( )
 {
 	//for one session: get papers
@@ -33,7 +45,7 @@ void LocalSearch::organizePapers ( )
 	}
 	unordered_map<int, unordered_map<int, int>> all_sessions;
 	int sess_count = -1;
-	
+	srand(time(NULL));
 	while (papers_avl.size())
 	{
 		cout << papers_avl.size()<<endl;
@@ -43,54 +55,60 @@ void LocalSearch::organizePapers ( )
 		cout << firstp << endl;
 		papers_avl.erase(firstp);
 		unordered_map<int, int> selected; //docID 
+		cout << "Starting a cluster\n";
+		cout << "Added " << firstp << " to cluster\n";
 		selected[firstp] = 1;
 		
 		//make one session:
-		cout << selected.size() << " " << papersInSession << endl;
 		while (selected.size() < papersInSession)
 		{
 			//similarities of rest available
-			cout << selected.size() << endl;
 			double c = 0;
-			unordered_map<int, double> sim; //ID to cumulative similarity
-			for (auto&mapelem: papers_avl)
+			unordered_map<int, double> similarity; //ID to cumulative similarity
+			for (auto&availID: papers_avl)
 			{
-				for (auto&elem : selected)
+				for (auto&selID : selected)
 				{
-					sim[mapelem.first] += (1.0 - distanceMatrix[elem.first][mapelem.first]);
-					c += 1.0 - distanceMatrix[elem.first][mapelem.first];
+					similarity[availID.first] += (1.0 - distanceMatrix[selID.first][availID.first]);
+					c += 1.0 - distanceMatrix[selID.first][availID.first];
 				}
 			}
-	        //cprobs of available
-			vector<pair<int, int>> cprob(papers_avl.size()); // <docID,sum>
+	        vector<pair<int, double>> cprob(papers_avl.size()); // <docID,sum>
 			double sum = 0;
 			int counter = 0;
-			for (auto&elem : sim)
+			for (auto&elem : similarity)
 			{
+
 				sum += elem.second / c;
-				//cout << "sum:" << sum << endl;
 				cprob[counter++]=make_pair(elem.first, sum);
 			}
-			//cout<<sum<<endl;
 
+			cout << "Printing cprob\n";
+			printMap(cprob);
+			
 			//choose next randomly
 			//can be made faster
-			double r = ((double)rand() / (RAND_MAX));
+			double r = ((double)rand());
+			cout << r << endl; 
+			r = r / (double)(RAND_MAX);
+			cout << "Chose r = " << r << " " << RAND_MAX << endl;
+			system("pause");
+
 			for (auto&elem : cprob)
 			{
 				if (elem.second > r)
 				{
 					selected[elem.first] = 1;
 					papers_avl.erase(elem.first);
+					cout << "Added " << elem.first << " to cluster\n";
+					break;
 				}
 			}
 		}
 		all_sessions[sess_count] = selected;
 	}
-
+	
 	int sessCounter = 0;
-	cout << "it is here:" << endl;
-	system("pause");
     for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
     {
         for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
@@ -100,12 +118,13 @@ void LocalSearch::organizePapers ( )
 			int counter = 0;
 			for (auto&elem: sel)
 			{
-                conference->setPaper ( j, i, counter++, elem.first);
+				conference->setPaper ( j, i, counter++, elem.first);
             }
 			sessCounter++;
         }
     }
 	conference->printConferenceStdout();
+	system("pause");
 }
 
 void LocalSearch::readInInputFile ( string filename )
