@@ -24,7 +24,60 @@ LocalSearch::LocalSearch ( string filename )
 
 void LocalSearch::organizePapers ( )
 {
-    int paperCounter = 0;
+	//for one session: get papers
+	vector<int> papers_avl(totalpapers);
+	for (int i = 0; i < totalpapers; i++)
+	{
+		papers_avl[i] = i;
+	}
+	while (papers_avl.size())
+	{
+		//first element chosen
+		int firstp = papers_avl[0];
+		papers_avl.erase(papers_avl.begin());
+		unordered_map<int, int> selected;
+		selected[firstp] = 1;
+		
+		//make one session:
+		while (selected.size() < papersInSession)
+		{
+			//similarities of rest available
+			double c = 0;
+			unordered_map<int, double> sim; //ID to cumulative similarity
+			for (int i = 1; i < papers_avl.size(); i++)
+			{
+				for (auto&elem : selected)
+				{
+					sim[papers_avl[i]] += (1.0 - distanceMatrix[elem.first][i]);
+					c += 1.0 - distanceMatrix[elem.first][i];
+				}
+			}
+	        //cprobs of available
+			vector<pair<int, int>> cprob(papers_avl.size()); //cprob to docID
+			double sum = 0;
+			int counter = 0;
+			for (auto&elem : sim)
+			{
+				sum += elem.second / c;
+				cprob[counter++]=make_pair(elem.first, sum);
+			}
+			cout<<sum;
+
+			//choose next randomly
+			// can be made faster
+			double r = ((double)rand() / (RAND_MAX));
+			for (auto&elem : cprob)
+			{
+				if (elem.second > r)
+				{
+					selected[elem.first] = 1;
+					papers_avl.erase(papers_avl.begin()) + j);
+				}
+			}
+		}
+	}
+
+	int paperCounter = 0;
     for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
     {
         for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
@@ -81,12 +134,13 @@ void LocalSearch::readInInputFile ( string filename )
     tradeoffCoefficient = atof ( lines[4].c_str () );
 
     int n = lines.size ( ) - 5;
+	totalpapers = n;
+
     double ** tempDistanceMatrix = new double*[n];
     for ( int i = 0; i < n; ++i )
     {
         tempDistanceMatrix[i] = new double[n];
     }
-
 
     for ( int i = 0; i < n; i++ )
     {

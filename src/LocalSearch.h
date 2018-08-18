@@ -28,12 +28,14 @@ using namespace std;
  *
  */
 class LocalSearch {
-private:
+public:
     double ** distanceMatrix;
 
     int parallelTracks ;
     int papersInSession ;
     int sessionsInTrack ;
+	int totalpapers;
+	
 
     Conference *conference;
 
@@ -59,8 +61,9 @@ public:
     /**
      * Organize the papers according to some algorithm.
      */
-    void organizePapers();
-    
+	void organizePapers();
+
+
     
     /**
      * Get the distance matrix.
