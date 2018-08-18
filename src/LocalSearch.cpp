@@ -22,6 +22,8 @@ LocalSearch::LocalSearch ( string filename )
 {
     readInInputFile ( filename );
     conference = new Conference ( parallelTracks, sessionsInTrack, papersInSession );
+    currentScore = 0;
+    bestScore = 0;
 }
 
 void printMap(vector<pair<int, double>> tmap)
@@ -37,8 +39,25 @@ void LocalSearch::organizePapers ( )
 {
 	//initialised start state
     getStartState();
+    currentScore = scoreOrganization();
+    bestState = new Conference(*conference);
+    bestScore = currentScore;
+    int stepsToClimb = (parallelTracks <= 8)?pow(parallelTracks, parallelTracks):1000000;
+    int stepNumber = 0;
+    while(stepNumber < stepsToClimb)
+    {
+        stepNumber++;
+        transition();
+        //updateState();
+    }
+    updateState();
+}
 
-	
+void LocalSearch::updateState()
+{
+    delete bestState;
+    bestState = new Conference(*conference);
+    bestScore = scoreOrganization(&bestState);
 }
 
 
@@ -53,7 +72,7 @@ void LocalSearch::transition()
 		//for every "row"
 		double scores[conference->getParallelTracks];
 		Track curtrack = this->conference->getTrack(i);
-		for (int j = 0; j < curtrack->sessionsInTrack-1; j++)
+		for (int j = 0; j < curtrack->sessionsInTrack - 1; j++)
 		{//first session 
 			for (int k = j + 1; k < curtrack->sessionsInTrack; k++)
 			{//second session
@@ -69,14 +88,12 @@ void LocalSearch::transition()
 							best_results[2] = k;
 							best_results[3] = m;
 						}
- 					}
-				}	
+					}
+				}
 			}
 		}
 	}
 }
-
-
 
 void LocalSearch::getStartState ( )
 {
@@ -244,7 +261,54 @@ void LocalSearch::printSessionOrganiser ( char * filename)
     conference->printConference ( filename);
 }
 
-double LocalSearch::scoreSwitch (int oldTrack, int oldSession, int newTrack, int newSession)
+double LocalSearch::scoreSwitch (int track, int sessionOne, int paperOne, int sessionTwo, int paperTwo)
+{
+    // Sum of pairwise similarities per session.
+    double similarityOne = 0.0;
+    double similarityTwo = 0.0;
+    double distanceOne = 0.0;
+    double distanceTwo = 0.0;
+    double similarityOneNew = 0.0;
+    double similarityTwoNew = 0.0;
+    double distanceOneNew = 0.0;
+    double distanceTwoNew = 0.0;
+    Track* tmpTrack = conference->getTrack ( track );
+    Session* tmpSessionOne = tmpTrack->getSession ( sessionOne );
+    Session* tmpSessionTwo = tmpTrack->getSession ( sessionTwo );
+    paperOne = tmpSessionOne->getPaper( paperOne );
+    paperTwo = tmpSessionTwo->getPaper( paperTwo );
+
+    for ( int k = 0; k < tmpSessionOne->getNumberOfPapers ( ); k++ )
+    {
+        int index = tmpSessionOne->getPaper ( k );
+        if(index != paperOne)
+        {
+            similarityOne += (1 - distanceMatrix[index][paperOne]);
+            similarityTwoNew += (1 - distanceMatrix[index][paperTwo]);
+            distanceOneNew += distanceMatrix[index][paperOne];
+        }
+        distanceTwo += distanceMatrix[index][paperTwo];
+    }
+
+    for ( int k = 0; k < tmpSessionTwo->getNumberOfPapers ( ); k++ )
+    {
+        int index = tmpSessionTwo->getPaper ( k );
+        if(index != paperTwo)
+        {
+            similarityTwo += (1 - distanceMatrix[index][paperTwo]);
+            similarityOneNew += (1 - distanceMatrix[index][paperOne]);
+            distanceTwoNew += distanceMatrix[index][paperTwo];
+        }
+        distanceOne += distanceMatrix[index][paperOne];
+    }
+    distanceOneNew += distanceMatrix[paperOne][paperTwo];
+    distanceTwoNew += distanceMatrix[paperOne][paperTwo];
+
+    double score = tradeoffCoefficient*(distanceOneNew + distanceTwoNew + similarityOneNew + similarityTwoNew) - (similarityOne + similarityTwo + distanceOne + distanceTwo);
+    return score;
+}
+
+double LocalSearch::scoreOrganization ( )
 {
     // Sum of pairwise similarities per session.
     double score1 = 0.0;
@@ -279,10 +343,9 @@ double LocalSearch::scoreSwitch (int oldTrack, int oldSession, int newTrack, int
                 int index1 = tmpSession1->getPaper ( k );
 
                 // Get competing papers.
-                for ( int l = i + 1; l < conference->getParallelTracks ( ); l++ )
+                for ( int l = j + 1; l < tmpTrack1->getNumberOfSessions ( ); l++ )
                 {
-                    Track* tmpTrack2 = conference->getTrack ( l );
-                    Session* tmpSession2 = tmpTrack2->getSession ( j );
+                    Session* tmpSession2 = tmpTrack1->getSession ( l );
                     for ( int m = 0; m < tmpSession2->getNumberOfPapers ( ); m++ )
                     {
                         int index2 = tmpSession2->getPaper ( m );
@@ -296,14 +359,13 @@ double LocalSearch::scoreSwitch (int oldTrack, int oldSession, int newTrack, int
     return score;
 }
 
-
-double LocalSearch::scoreOrganization ( )
+double LocalSearch::scoreOrganization ( Conference *conferenceTmp )
 {
     // Sum of pairwise similarities per session.
     double score1 = 0.0;
-    for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
+    for ( int i = 0; i < conferenceTmp->getParallelTracks ( ); i++ )
     {
-        Track* tmpTrack = conference->getTrack ( i );
+        Track* tmpTrack = conferenceTmp->getTrack ( i );
         for ( int j = 0; j < tmpTrack->getNumberOfSessions ( ); j++ )
         {
             Session* tmpSession = tmpTrack->getSession ( j );
@@ -321,9 +383,9 @@ double LocalSearch::scoreOrganization ( )
 
     // Sum of distances for competing papers.
     double score2 = 0.0;
-    for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
+    for ( int i = 0; i < conferenceTmp->getParallelTracks ( ); i++ )
     {
-        Track* tmpTrack1 = conference->getTrack ( i );
+        Track* tmpTrack1 = conferenceTmp->getTrack ( i );
         for ( int j = 0; j < tmpTrack1->getNumberOfSessions ( ); j++ )
         {
             Session* tmpSession1 = tmpTrack1->getSession ( j );
