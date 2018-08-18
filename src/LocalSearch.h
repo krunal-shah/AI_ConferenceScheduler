@@ -77,6 +77,8 @@ public:
      * @return the score.
      */
     double scoreOrganization();
+
+    double scoreSwitch();
     
     
     void printSessionOrganiser(char *);
