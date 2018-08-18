@@ -26,7 +26,7 @@ void LocalSearch::organizePapers ( )
 {
 	//for one session: get papers
 	unordered_map<int, int> papers_avl;
-	cout << "totalpapers" << totalpapers << endl;
+	cout << "totalpapers = " << totalpapers << endl;
 	for (int i = 0; i < totalpapers; i++)
 	{
 		papers_avl[i] = 0; //we dont care for value. key=paperID
@@ -181,7 +181,7 @@ void LocalSearch::printSessionOrganiser ( char * filename)
     conference->printConference ( filename);
 }
 
-double LocalSearch::scoreSwitch ( )
+double LocalSearch::scoreSwitch (int oldTrack, int oldSession, int newTrack, int newSession)
 {
     // Sum of pairwise similarities per session.
     double score1 = 0.0;
