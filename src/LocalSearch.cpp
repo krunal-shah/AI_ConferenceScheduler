@@ -89,14 +89,6 @@ void LocalSearch::organizePapers ( )
             }
         }
     }
-    system("pause");
-    Conference *newConference = new Conference(this->conference);
-    cout << "this conference is \n";
-    system("pause");
-    this->conference->printConferenceStdout();
-    
-    cout << "\ncopied conference is \n";
-    newConference->printConferenceStdout();
 }
 
 void LocalSearch::readInInputFile ( string filename )
@@ -112,13 +104,11 @@ void LocalSearch::readInInputFile ( string filename )
             lines.push_back ( line );
         }
         myfile.close ( );
-		system("pause");
     }
     else
     {
         cout << "Unable to open input file";
-		system("pause");
-        exit ( 0 );
+		exit ( 0 );
     }
 
     if ( 6 > lines.size ( ) )
@@ -173,6 +163,59 @@ void LocalSearch::printSessionOrganiser ( char * filename)
 {
     conference->printConference ( filename);
 }
+
+double LocalSearch::scoreSwitch ( )
+{
+    // Sum of pairwise similarities per session.
+    double score1 = 0.0;
+    for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
+    {
+        Track* tmpTrack = conference->getTrack ( i );
+        for ( int j = 0; j < tmpTrack->getNumberOfSessions ( ); j++ )
+        {
+            Session* tmpSession = tmpTrack->getSession ( j );
+            for ( int k = 0; k < tmpSession->getNumberOfPapers ( ); k++ )
+            {
+                int index1 = tmpSession->getPaper ( k );
+                for ( int l = k + 1; l < tmpSession->getNumberOfPapers ( ); l++ )
+                {
+                    int index2 = tmpSession->getPaper ( l );
+                    score1 += 1 - distanceMatrix[index1][index2];
+                }
+            }
+        }
+    }
+
+    // Sum of distances for competing papers.
+    double score2 = 0.0;
+    for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
+    {
+        Track* tmpTrack1 = conference->getTrack ( i );
+        for ( int j = 0; j < tmpTrack1->getNumberOfSessions ( ); j++ )
+        {
+            Session* tmpSession1 = tmpTrack1->getSession ( j );
+            for ( int k = 0; k < tmpSession1->getNumberOfPapers ( ); k++ )
+            {
+                int index1 = tmpSession1->getPaper ( k );
+
+                // Get competing papers.
+                for ( int l = i + 1; l < conference->getParallelTracks ( ); l++ )
+                {
+                    Track* tmpTrack2 = conference->getTrack ( l );
+                    Session* tmpSession2 = tmpTrack2->getSession ( j );
+                    for ( int m = 0; m < tmpSession2->getNumberOfPapers ( ); m++ )
+                    {
+                        int index2 = tmpSession2->getPaper ( m );
+                        score2 += distanceMatrix[index1][index2];
+                    }
+                }
+            }
+        }
+    }
+    double score = score1 + tradeoffCoefficient*score2;
+    return score;
+}
+
 
 double LocalSearch::scoreOrganization ( )
 {
