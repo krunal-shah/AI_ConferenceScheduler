@@ -25,17 +25,20 @@ LocalSearch::LocalSearch ( string filename )
 void LocalSearch::organizePapers ( )
 {
 	//for one session: get papers
-	vector<int> papers_avl(totalpapers);
+	unordered_map<int, int> papers_avl;
 	for (int i = 0; i < totalpapers; i++)
 	{
-		papers_avl[i] = i;
+		papers_avl[i] = 0; //we dont care for value. key=paperID
 	}
+	unordered_map<int, unordered_map<int, int>> all_sessions;
+	int sess_count = -1;
 	while (papers_avl.size())
 	{
+		sess_count++;
 		//first element chosen
-		int firstp = papers_avl[0];
+		int firstp = papers_avl.begin()->first;
 		papers_avl.erase(papers_avl.begin());
-		unordered_map<int, int> selected;
+		unordered_map<int, int> selected; //docID 
 		selected[firstp] = 1;
 		
 		//make one session:
@@ -53,7 +56,7 @@ void LocalSearch::organizePapers ( )
 				}
 			}
 	        //cprobs of available
-			vector<pair<int, int>> cprob(papers_avl.size()); //cprob to docID
+			vector<pair<int, int>> cprob(papers_avl.size()); // <docID,sum>
 			double sum = 0;
 			int counter = 0;
 			for (auto&elem : sim)
@@ -64,31 +67,37 @@ void LocalSearch::organizePapers ( )
 			cout<<sum;
 
 			//choose next randomly
-			// can be made faster
+			//can be made faster
 			double r = ((double)rand() / (RAND_MAX));
 			for (auto&elem : cprob)
 			{
 				if (elem.second > r)
 				{
 					selected[elem.first] = 1;
-					papers_avl.erase(papers_avl.begin()) + j);
+					papers_avl.erase(elem.first);
 				}
 			}
 		}
+		all_sessions[sess_count] = selected;
 	}
 
-	int paperCounter = 0;
+	int sessCounter = 0;
     for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
     {
         for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
         {
-            for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
-            {
-                conference->setPaper ( j, i, k, paperCounter );
-                paperCounter++;
+			unordered_map<int, int> sel=all_sessions[sessCounter];
+            //for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
+			int counter = 0;
+			for (auto&elem: sel)
+			{
+                conference->setPaper ( j, i, counter++, elem.first);
             }
+			sessCounter++;
         }
     }
+
+	conference->printConferenceStdout();
 }
 
 void LocalSearch::readInInputFile ( string filename )
