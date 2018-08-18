@@ -26,33 +26,39 @@ void LocalSearch::organizePapers ( )
 {
 	//for one session: get papers
 	unordered_map<int, int> papers_avl;
+	cout << "totalpapers" << totalpapers << endl;
 	for (int i = 0; i < totalpapers; i++)
 	{
 		papers_avl[i] = 0; //we dont care for value. key=paperID
 	}
 	unordered_map<int, unordered_map<int, int>> all_sessions;
 	int sess_count = -1;
+	
 	while (papers_avl.size())
 	{
+		cout << papers_avl.size()<<endl;
 		sess_count++;
 		//first element chosen
 		int firstp = papers_avl.begin()->first;
-		papers_avl.erase(papers_avl.begin());
+		cout << firstp << endl;
+		papers_avl.erase(firstp);
 		unordered_map<int, int> selected; //docID 
 		selected[firstp] = 1;
 		
 		//make one session:
+		cout << selected.size() << " " << papersInSession << endl;
 		while (selected.size() < papersInSession)
 		{
 			//similarities of rest available
+			cout << selected.size() << endl;
 			double c = 0;
 			unordered_map<int, double> sim; //ID to cumulative similarity
-			for (int i = 1; i < papers_avl.size(); i++)
+			for (auto&mapelem: papers_avl)
 			{
 				for (auto&elem : selected)
 				{
-					sim[papers_avl[i]] += (1.0 - distanceMatrix[elem.first][i]);
-					c += 1.0 - distanceMatrix[elem.first][i];
+					sim[mapelem.first] += (1.0 - distanceMatrix[elem.first][mapelem.first]);
+					c += 1.0 - distanceMatrix[elem.first][mapelem.first];
 				}
 			}
 	        //cprobs of available
@@ -62,9 +68,10 @@ void LocalSearch::organizePapers ( )
 			for (auto&elem : sim)
 			{
 				sum += elem.second / c;
+				//cout << "sum:" << sum << endl;
 				cprob[counter++]=make_pair(elem.first, sum);
 			}
-			cout<<sum;
+			//cout<<sum<<endl;
 
 			//choose next randomly
 			//can be made faster
@@ -82,6 +89,8 @@ void LocalSearch::organizePapers ( )
 	}
 
 	int sessCounter = 0;
+	cout << "it is here:" << endl;
+	system("pause");
     for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
     {
         for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
@@ -96,10 +105,7 @@ void LocalSearch::organizePapers ( )
 			sessCounter++;
         }
     }
-
 	conference->printConferenceStdout();
-
-
 }
 
 void LocalSearch::readInInputFile ( string filename )

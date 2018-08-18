@@ -26,6 +26,7 @@ int main ( int argc, char** argv )
     
     // Initialize the conference organizer.
     SessionOrganizer *organizer  = new SessionOrganizer(inputfilename);
+	//LocalSearch *organizer = new LocalSearch(inputfilename);
 
     // Organize the papers into tracks based on similarity.
     organizer->organizePapers();

@@ -143,4 +143,5 @@ void Conference::printConferenceStdout ()
         cout<<"\n";
     }
     cout<<"\n\n";
+	system("pause");
 }
