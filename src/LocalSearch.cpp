@@ -88,7 +88,7 @@ void LocalSearch::organizePapers ( )
 void LocalSearch::updateState()
 {
     delete bestState;
-    bestState = new Conference(*conference);
+    bestState = new Conference(conference);
     bestScore = scoreOrganization(bestState);
 }
 
