@@ -38,11 +38,11 @@ int Track::getNumberOfSessions ( )
     return this->sessionsInTrack;
 }
 
-Session Track::getSession ( int index )
+Session* Track::getSession ( int index )
 {
     if ( index < this->sessionsInTrack )
     {
-        return sessions[index];
+        return &(sessions[index]);
     }
     else
     {

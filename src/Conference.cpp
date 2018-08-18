@@ -21,6 +21,29 @@ Conference::Conference ( int parallelTracks, int sessionsInTrack, int papersInSe
     initTracks ( parallelTracks, sessionsInTrack, papersInSession );
 }
 
+Conference::Conference ( Conference *baseConference )
+{
+    this->parallelTracks = baseConference->getParallelTracks();
+    this->sessionsInTrack = baseConference->getSessionsInTrack();
+    this->papersInSession = baseConference->getPapersInSession();
+    initTracks ( parallelTracks, sessionsInTrack, papersInSession );
+    int paperCounter = 0;
+    for ( int i = 0; i < this->getSessionsInTrack ( ); i++ )
+    {
+        Track *baseTrack = baseConference->getTrack(i);
+        for ( int j = 0; j < this->getParallelTracks ( ); j++ )
+        {
+            Session *baseSession = baseTrack->getSession(j);
+            for ( int k = 0; k < this->getPapersInSession ( ); k++ )
+            {
+                int basePaper = baseSession->getPaper(k);
+                this->setPaper ( j, i, k, basePaper );
+                paperCounter++;
+            }
+        }
+    }
+}
+
 void Conference::initTracks ( int parallelTracks, int sessionsInTrack, int papersInSession )
 {
     tracks = ( Track * ) malloc ( sizeof (Track ) * parallelTracks );
@@ -51,11 +74,11 @@ int Conference::getPapersInSession ( )
     return papersInSession;
 }
 
-Track Conference::getTrack ( int index )
+Track* Conference::getTrack ( int index )
 {
     if ( index < parallelTracks )
     {
-        return tracks[index];
+        return &(tracks[index]);
     }
     else
     {
@@ -88,7 +111,7 @@ void Conference::printConference (char * filename )
         {
             for ( int k = 0; k < papersInSession; k++ )
             {
-                ofile<< tracks[j].getSession ( i ).getPaper ( k ) << " ";
+                ofile<< tracks[j].getSession ( i )->getPaper ( k ) << " ";
             }
             if ( j != parallelTracks - 1 )
             {

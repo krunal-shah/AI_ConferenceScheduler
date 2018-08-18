@@ -35,7 +35,7 @@ int main ( int argc, char** argv )
     // Score the organization against the gold standard.
     double score = organizer->scoreOrganization();
     cout<< "score:"<<score<<endl;
-
+	system("pause");
     return 0;
 }
 

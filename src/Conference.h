@@ -39,7 +39,8 @@ public:
      */
     Conference(int parallelTracks, int sessionsInTrack, int papersInSession);
     
-    
+    Conference(Conference* baseConference);
+
     /**
      * Initialize the tracks.
      * @param parallelTracks is the number of parallel tracks.
@@ -75,7 +76,7 @@ public:
      * @param index is the index of the specified track.
      * @return the track
      */
-    Track getTrack(int index);
+    Track* getTrack(int index);
     
     
     /**

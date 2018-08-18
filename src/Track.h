@@ -56,7 +56,7 @@ public:
      * @param index is the index of the session in question.
      * @return the session at the index.
      */
-    Session getSession(int index);
+    Session* getSession(int index);
     
     
     /**

@@ -47,20 +47,22 @@ void SessionOrganizer::readInInputFile ( string filename )
     {
         while ( getline ( myfile, line ) )
         {
-            //cout<<"Line read:"<<line<<endl;
+            cout<<"Line read:"<<line<<endl;
             lines.push_back ( line );
         }
         myfile.close ( );
+		system("pause");
     }
     else
     {
         cout << "Unable to open input file";
-        exit ( 0 );
+		exit ( 0 );
     }
 
     if ( 6 > lines.size ( ) )
     {
         cout << "Not enough information given, check format of input file";
+		
         exit ( 0 );
     }
 
@@ -81,7 +83,7 @@ void SessionOrganizer::readInInputFile ( string filename )
     for ( int i = 0; i < n; i++ )
     {
         string tempLine = lines[ i + 5 ];
-        string elements[n];
+        vector<string> elements(n);
         splitString ( tempLine, " ", elements, n );
 
         for ( int j = 0; j < n; j++ )
@@ -114,21 +116,21 @@ void SessionOrganizer::printSessionOrganiser ( char * filename)
 
 double SessionOrganizer::scoreOrganization ( )
 {
-    return search->scoreOrganization();
     // Sum of pairwise similarities per session.
+    return search->scoreOrganization();
     double score1 = 0.0;
     for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
     {
-        Track tmpTrack = conference->getTrack ( i );
-        for ( int j = 0; j < tmpTrack.getNumberOfSessions ( ); j++ )
+        Track* tmpTrack = conference->getTrack ( i );
+        for ( int j = 0; j < tmpTrack->getNumberOfSessions ( ); j++ )
         {
-            Session tmpSession = tmpTrack.getSession ( j );
-            for ( int k = 0; k < tmpSession.getNumberOfPapers ( ); k++ )
+            Session* tmpSession = tmpTrack->getSession ( j );
+            for ( int k = 0; k < tmpSession->getNumberOfPapers ( ); k++ )
             {
-                int index1 = tmpSession.getPaper ( k );
-                for ( int l = k + 1; l < tmpSession.getNumberOfPapers ( ); l++ )
+                int index1 = tmpSession->getPaper ( k );
+                for ( int l = k + 1; l < tmpSession->getNumberOfPapers ( ); l++ )
                 {
-                    int index2 = tmpSession.getPaper ( l );
+                    int index2 = tmpSession->getPaper ( l );
                     score1 += 1 - distanceMatrix[index1][index2];
                 }
             }
@@ -139,22 +141,22 @@ double SessionOrganizer::scoreOrganization ( )
     double score2 = 0.0;
     for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
     {
-        Track tmpTrack1 = conference->getTrack ( i );
-        for ( int j = 0; j < tmpTrack1.getNumberOfSessions ( ); j++ )
+        Track* tmpTrack1 = conference->getTrack ( i );
+        for ( int j = 0; j < tmpTrack1->getNumberOfSessions ( ); j++ )
         {
-            Session tmpSession1 = tmpTrack1.getSession ( j );
-            for ( int k = 0; k < tmpSession1.getNumberOfPapers ( ); k++ )
+            Session* tmpSession1 = tmpTrack1->getSession ( j );
+            for ( int k = 0; k < tmpSession1->getNumberOfPapers ( ); k++ )
             {
-                int index1 = tmpSession1.getPaper ( k );
+                int index1 = tmpSession1->getPaper ( k );
 
                 // Get competing papers.
                 for ( int l = i + 1; l < conference->getParallelTracks ( ); l++ )
                 {
-                    Track tmpTrack2 = conference->getTrack ( l );
-                    Session tmpSession2 = tmpTrack2.getSession ( j );
-                    for ( int m = 0; m < tmpSession2.getNumberOfPapers ( ); m++ )
+                    Track* tmpTrack2 = conference->getTrack ( l );
+                    Session* tmpSession2 = tmpTrack2->getSession ( j );
+                    for ( int m = 0; m < tmpSession2->getNumberOfPapers ( ); m++ )
                     {
-                        int index2 = tmpSession2.getPaper ( m );
+                        int index2 = tmpSession2->getPaper ( m );
                         score2 += distanceMatrix[index1][index2];
                     }
                 }
