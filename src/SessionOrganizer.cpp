@@ -105,7 +105,7 @@ void SessionOrganizer::printSessionOrganiser ( char * filename)
 double SessionOrganizer::scoreOrganization ( )
 {
     // Sum of pairwise similarities per session.
-    return search->scoreOrganization();
+    return search->scoreBestOrganization();
     double score1 = 0.0;
     for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
     {

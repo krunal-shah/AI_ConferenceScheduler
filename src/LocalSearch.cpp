@@ -37,38 +37,52 @@ void printMap(vector<pair<int, double>> tmap)
 
 void LocalSearch::organizePapers ( )
 {
-	//initialised start state
+	// initialised start state
     getStartState();
-    cout << "Start state exited\n";
-    system("pause");
     currentScore = scoreOrganization();
-    bestState = new Conference(*conference);
-    bestScore = currentScore;
-    int stepsToClimb = (parallelTracks <= 8)?pow(parallelTracks, parallelTracks):1000000;
+    bestState = new Conference(conference);
+    bestScore = scoreOrganization(bestState);
+    // bestScore = currentScore;
+    cout << "Start state exited with score " << currentScore << endl;
+    system("pause");
+    int stepsToClimb = (parallelTracks <= 8)?pow(2*parallelTracks, parallelTracks):1000000;
     int tempStepsLimit = -1;
     int stepNumber = 0;
     vector<double> stepInfo(6);
+    cout << "Steps" << stepsToClimb << endl;
     while(stepNumber < stepsToClimb)
     {
+        cout << "Computing step\n";
         stepNumber++;
         computeBestTransition(stepInfo);
-		cout << "StepInfo\n";
-        for(auto&elem:stepInfo)
-        {
-            cout << elem << " ";
-        }
-        cout << endl;
-        system("pause");
+		
+        cout << "Next step computed:\n";
+        cout << "time = " << stepInfo[4] << " change in score = " << stepInfo[5] << endl;
+        cout << "sessionOne = " << stepInfo[0] << " paperOne = " << stepInfo[1] << endl;
+        cout << "sessionTwo = " << stepInfo[2] << " paperTwo = " << stepInfo[3] << endl;  
+        
         decideStep(stepInfo, tempStepsLimit);
+        
         if(tempStepsLimit > 0)
         {
             tempStepsLimit--;
             if(tempStepsLimit == 0)
             break;
         }
-        //updateState();
     }
-    updateState();
+    bestScore = scoreOrganization(bestState);
+    // int paperCounter = 0;
+    // for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
+    // {
+    //     for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
+    //     {
+    //         for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
+    //         {
+    //             conference->setPaper ( j, i, k, paperCounter );
+    //             paperCounter++;
+    //         }
+    //     }
+    // }
 }
 
 void LocalSearch::updateState()
@@ -86,6 +100,7 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
     int sessionTwo = stepInfo[2];
     int paperTwo = stepInfo[3];
     int trackIndex = stepInfo[4];
+    
     if(bestStepScore < 0)
     {
         tempStepsLimit = 10;
@@ -118,6 +133,13 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
         int tempPaperId = curSessionOne->getPaper(paperOne);
         curSessionOne->setPaper(paperOne, curSessionTwo->getPaper(paperTwo));
         curSessionTwo->setPaper(paperTwo, tempPaperId);
+    }
+    currentScore += bestStepScore;
+
+    if(currentScore > bestScore)
+    {
+        cout << "Updating bestState\n";
+        updateState();
     }
 }
 
@@ -166,7 +188,6 @@ void LocalSearch::getStartState ( )
 {
 	//for one session: get papers
 	unordered_map<int, int> papers_avl;
-	cout << "totalpapers = " << totalpapers << endl;
 	for (int i = 0; i < totalpapers; i++)
 	{
 		papers_avl[i] = 0; //we dont care for value. key=paperID
@@ -176,15 +197,13 @@ void LocalSearch::getStartState ( )
 	srand(time(NULL));
 	while (papers_avl.size())
 	{
-		cout << papers_avl.size()<<endl;
 		sess_count++;
 		//first element chosen
 		int firstp = papers_avl.begin()->first;
-		cout << firstp << endl;
 		papers_avl.erase(firstp);
 		unordered_map<int, int> selected; //docID 
-		cout << "Starting a cluster\n";
-		cout << "Added " << firstp << " to cluster\n";
+		// cout << "Starting a cluster\n";
+		// cout << "Added " << firstp << " to cluster\n";
 		selected[firstp] = 1;
 		
 		//make one session:
@@ -212,15 +231,14 @@ void LocalSearch::getStartState ( )
 			}
 
 			//cout << "Printing cprob\n";
-			printMap(cprob);
+			//printMap(cprob);
 			
 			//choose next randomly
 			//can be made faster
 			double r = ((double)rand());
-			cout << r << endl; 
 			r = r / (double)(RAND_MAX);
-			cout << "Chose r = " << r << " " << RAND_MAX << endl;
-			system("pause");
+			// cout << "Chose r = " << r << " " << RAND_MAX << endl;
+			// system("pause");
 
 			for (auto&elem : cprob)
 			{
@@ -228,14 +246,14 @@ void LocalSearch::getStartState ( )
 				{
 					selected[elem.first] = 1;
 					papers_avl.erase(elem.first);
-					cout << "Added " << elem.first << " to cluster\n";
+					// cout << "Added " << elem.first << " to cluster\n";
 					break;
 				}
 			}
 		}
 		all_sessions[sess_count] = selected;
 	}
-    system("pause");
+    // system("pause");
 	
 	int sessCounter = 0;
     for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
@@ -252,8 +270,9 @@ void LocalSearch::getStartState ( )
 			sessCounter++;
         }
     }
+    cout << "Printing starting conference\n";
 	conference->printConferenceStdout();
-	system("pause");
+	// system("pause");
 }
 
 void LocalSearch::readInInputFile ( string filename )
@@ -326,7 +345,7 @@ double** LocalSearch::getDistanceMatrix ( )
 
 void LocalSearch::printSessionOrganiser ( char * filename)
 {
-    conference->printConference ( filename);
+    bestState->printConference ( filename);
 }
 
 double LocalSearch::scoreSwitch (int track, int sessionOne, int paperOne, int sessionTwo, int paperTwo)
@@ -397,7 +416,7 @@ double LocalSearch::scoreOrganization ( )
             }
         }
     }
-
+    
     // Sum of distances for competing papers.
     double score2 = 0.0;
     for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
@@ -436,6 +455,7 @@ double LocalSearch::scoreOrganization ( Conference *conferenceTmp )
         Track* tmpTrack = conferenceTmp->getTrack ( i );
         for ( int j = 0; j < tmpTrack->getNumberOfSessions ( ); j++ )
         {
+
             Session* tmpSession = tmpTrack->getSession ( j );
             for ( int k = 0; k < tmpSession->getNumberOfPapers ( ); k++ )
             {
@@ -476,4 +496,9 @@ double LocalSearch::scoreOrganization ( Conference *conferenceTmp )
     }
     double score = score1 + tradeoffCoefficient*score2;
     return score;
+}
+
+double LocalSearch::scoreBestOrganization()
+{
+    return scoreOrganization(bestState);
 }

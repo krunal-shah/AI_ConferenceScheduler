@@ -91,6 +91,8 @@ public:
     void LocalSearch::decideStep(vector<double>, int &);
 
     void updateState();
+
+	double LocalSearch::scoreBestOrganization();
     
     void printSessionOrganiser(char *);
 };

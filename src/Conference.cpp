@@ -139,20 +139,19 @@ void Conference::printConference (char * filename )
     ofile.close();
     cout<<"Organization written to ";
     printf("%s :)\n",filename);
-
 }
 
 void Conference::printConferenceStdout ()
 {
-    for ( int i = 0; i < sessionsInTrack; i++ )
+    for ( int i = 0; i < parallelTracks; i++ )
     {
-        for ( int j = 0; j < parallelTracks; j++ )
+        for ( int j = 0; j < sessionsInTrack; j++ )
         {
             for ( int k = 0; k < papersInSession; k++ )
             {
-                cout << tracks[j].getSession ( i )->getPaper ( k ) << " ";
+                cout << tracks[i].getSession ( j )->getPaper ( k ) << " ";
             }
-            if ( j != parallelTracks - 1 )
+            if ( j != sessionsInTrack - 1 )
             {
                 cout <<"| ";
             }
@@ -160,5 +159,4 @@ void Conference::printConferenceStdout ()
         cout<<"\n";
     }
     cout<<"\n\n";
-	system("pause");
 }

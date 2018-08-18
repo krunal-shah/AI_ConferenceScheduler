@@ -9,9 +9,10 @@
 
 using namespace std;
 
-void splitString(std::string message, std::string delimiter, vector<string> result, int n) {
+void splitString(std::string message, std::string delimiter, vector<string> &result, int n) {
     int i = 0, pos = 0, length = 0, temp;
     temp = message.find ( delimiter.c_str ( ), pos );
+    
     while ( temp != -1 )
     {
         length = temp - pos;

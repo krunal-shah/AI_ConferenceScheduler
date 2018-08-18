@@ -18,6 +18,6 @@
  * @param result result will be stored in this array
  * @param expcted length of the result
  */
-void splitString(std::string message, std::string delimiter, std::vector<std::string> result, int n);
+void splitString(std::string message, std::string delimiter, std::vector<std::string> &result, int n);
 
 #endif	/* UTIL_H */
