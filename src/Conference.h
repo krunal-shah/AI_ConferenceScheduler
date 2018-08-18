@@ -90,6 +90,7 @@ public:
     
     
     void printConference(char *);
+    void Conference::printConferenceStdout ();
 };
 
 #endif	/* CONFERENCE_H */

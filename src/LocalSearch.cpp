@@ -96,6 +96,7 @@ void LocalSearch::organizePapers ( )
 			sessCounter++;
         }
     }
+
 	conference->printConferenceStdout();
 
 
