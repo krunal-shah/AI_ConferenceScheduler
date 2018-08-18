@@ -36,10 +36,10 @@ public:
     int sessionsInTrack ;
 	int totalpapers;
 	
-    int currentScore;
+    double currentScore;
+    double bestScore;
     Conference *conference;
     Conference *bestState;
-    int bestScore;
 
     double processingTimeInMinutes ;
     double tradeoffCoefficient ; // the tradeoff coefficient
@@ -79,13 +79,17 @@ public:
      * @return the score.
      */
     double scoreOrganization();
-    double LocalSearch::scoreOrganization ( Conference *conference );
+    double scoreOrganization ( Conference *conference );
 
-    double LocalSearch::scoreSwitch (int oldTrack, int oldSession, int newTrack, int newSession);
+    double scoreSwitch (int track, int sessionOne, int paperOne, int sessionTwo, int paperTwo);
     
-	void LocalSearch::getStartState ( );
+	void getStartState ( );
 
-	void LocalSearch::transition();
+	void computeBestTransition(vector<double>&);
+
+    void LocalSearch::decideStep(vector<double>, int &);
+
+    void updateState();
     
     void printSessionOrganiser(char *);
 };

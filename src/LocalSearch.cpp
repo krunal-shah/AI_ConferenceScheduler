@@ -39,15 +39,33 @@ void LocalSearch::organizePapers ( )
 {
 	//initialised start state
     getStartState();
+    cout << "Start state exited\n";
+    system("pause");
     currentScore = scoreOrganization();
     bestState = new Conference(*conference);
     bestScore = currentScore;
     int stepsToClimb = (parallelTracks <= 8)?pow(parallelTracks, parallelTracks):1000000;
+    int tempStepsLimit = -1;
     int stepNumber = 0;
+    vector<double> stepInfo(6);
     while(stepNumber < stepsToClimb)
     {
         stepNumber++;
-        transition();
+        computeBestTransition(stepInfo);
+        cout << "StepInfo\n"
+        for(auto&elem:stepInfo)
+        {
+            cout << elem << " ";
+        }
+        cout << endl;
+        system("pause");
+        decideStep(stepInfo, tempStepsLimit);
+        if(tempStepsLimit > 0)
+        {
+            tempStepsLimit--;
+            if(tempStepsLimit == 0)
+            break;
+        }
         //updateState();
     }
     updateState();
@@ -57,36 +75,85 @@ void LocalSearch::updateState()
 {
     delete bestState;
     bestState = new Conference(*conference);
-    bestScore = scoreOrganization(&bestState);
+    bestScore = scoreOrganization(bestState);
 }
 
+void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
+{
+    double bestStepScore = stepInfo[5];
+    int sessionOne = stepInfo[0];
+    int paperOne = stepInfo[1];
+    int sessionTwo = stepInfo[2];
+    int paperTwo = stepInfo[3];
+    int trackIndex = stepInfo[4];
+    if(bestStepScore < 0)
+    {
+        tempStepsLimit = 10;
+        
+        Track *curTrack = conference->getTrack(trackIndex);
+		Session *curSessionOne = curTrack->getSession(sessionOne);
+        Session *curSessionTwo = curTrack->getSession(sessionTwo);
+        int tempPaperId = curSessionTwo->getPaper(paperOne);
+        curSessionOne->setPaper(paperOne, curSessionTwo->getPaper(paperTwo));
+        curSessionTwo->setPaper(paperTwo, tempPaperId);
+    }
+    else if(bestStepScore > 0)
+    {
+        tempStepsLimit = -1;
 
-void LocalSearch::transition()
+        Track *curTrack = conference->getTrack(trackIndex);
+		Session *curSessionOne = curTrack->getSession(sessionOne);
+        Session *curSessionTwo = curTrack->getSession(sessionTwo);
+        int tempPaperId = curSessionTwo->getPaper(paperOne);
+        curSessionOne->setPaper(paperOne, curSessionTwo->getPaper(paperTwo));
+        curSessionTwo->setPaper(paperTwo, tempPaperId);
+    }
+    else
+    {
+        tempStepsLimit = 20;
+
+        Track *curTrack = conference->getTrack(trackIndex);
+		Session *curSessionOne = curTrack->getSession(sessionOne);
+        Session *curSessionTwo = curTrack->getSession(sessionTwo);
+        int tempPaperId = curSessionTwo->getPaper(paperOne);
+        curSessionOne->setPaper(paperOne, curSessionTwo->getPaper(paperTwo));
+        curSessionTwo->setPaper(paperTwo, tempPaperId);
+    }
+}
+
+void LocalSearch::computeBestTransition(vector<double> &best_results)
 {
 	//considering costs for swapping two members in the same row, for every row, to constitute transition space
-	double bestcost = -100.0;
-	vector<int> best_results(4); //session1, page index1, session2, page index2
+	double bestcost = -1000000000;
+	best_results[0] = 0;
+    best_results[1] = 0;
+    best_results[2] = 0;
+    best_results[3] = 0;
+    best_results[4] = 0;
+    best_results[5] = -1000000000;
 
-	for (int i = 0; i < conference->getParallelTracks; i++)
+	for (int i = 0; i < conference->getParallelTracks(); i++)
 	{
 		//for every "row"
-		double scores[conference->getParallelTracks];
-		Track curtrack = this->conference->getTrack(i);
-		for (int j = 0; j < curtrack->sessionsInTrack - 1; j++)
+		Track *curtrack = this->conference->getTrack(i);
+		for (int j = 0; j < curtrack->getNumberOfSessions() - 1; j++)
 		{//first session 
-			for (int k = j + 1; k < curtrack->sessionsInTrack; k++)
+			for (int k = j + 1; k < curtrack->getNumberOfSessions(); k++)
 			{//second session
 				for (int l = 0; l < papersInSession; l++)
 				{//compare cost of every paper of first session with second session 
 					for (int m = 0; m < papersInSession; m++)
 					{
-						double tempcost = scoreSwitch(curtrack, j, curtrack->getSession(j)->papers[l], k, curtrack->getSession(k)->papers[m]);
+						double tempcost = scoreSwitch(i, j, l, k, m);
 						if (tempcost > bestcost)
 						{
-							best_results[0] = j;
+							bestcost = tempcost;
+                            best_results[0] = j;
 							best_results[1] = l;
 							best_results[2] = k;
 							best_results[3] = m;
+                            best_results[4] = i;
+                            best_results[5] = bestcost;
 						}
 					}
 				}
@@ -168,6 +235,7 @@ void LocalSearch::getStartState ( )
 		}
 		all_sessions[sess_count] = selected;
 	}
+    system("pause");
 	
 	int sessCounter = 0;
     for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
