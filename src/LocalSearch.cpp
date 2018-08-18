@@ -52,7 +52,7 @@ void LocalSearch::organizePapers ( )
     {
         stepNumber++;
         computeBestTransition(stepInfo);
-        cout << "StepInfo\n"
+		cout << "StepInfo\n";
         for(auto&elem:stepInfo)
         {
             cout << elem << " ";
