@@ -82,7 +82,8 @@ public:
     double scoreOrganization ( Conference *conference );
 
     double scoreSwitch (int track, int sessionOne, int paperOne, int sessionTwo, int paperTwo);
-    
+
+
 	void getStartState ( );
 
 	void computeBestTransition(vector<double>&);
