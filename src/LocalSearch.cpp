@@ -52,7 +52,7 @@ void LocalSearch::organizePapers ( )
     {
         stepNumber++;
         computeBestTransition(stepInfo);
-        cout << "StepInfo\n"
+		cout << "StepInfo\n";
         for(auto&elem:stepInfo)
         {
             cout << elem << " ";
@@ -93,7 +93,7 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
         Track *curTrack = conference->getTrack(trackIndex);
 		Session *curSessionOne = curTrack->getSession(sessionOne);
         Session *curSessionTwo = curTrack->getSession(sessionTwo);
-        int tempPaperId = curSessionTwo->getPaper(paperOne);
+        int tempPaperId = curSessionOne->getPaper(paperOne);
         curSessionOne->setPaper(paperOne, curSessionTwo->getPaper(paperTwo));
         curSessionTwo->setPaper(paperTwo, tempPaperId);
     }
@@ -104,7 +104,7 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
         Track *curTrack = conference->getTrack(trackIndex);
 		Session *curSessionOne = curTrack->getSession(sessionOne);
         Session *curSessionTwo = curTrack->getSession(sessionTwo);
-        int tempPaperId = curSessionTwo->getPaper(paperOne);
+        int tempPaperId = curSessionOne->getPaper(paperOne);
         curSessionOne->setPaper(paperOne, curSessionTwo->getPaper(paperTwo));
         curSessionTwo->setPaper(paperTwo, tempPaperId);
     }
@@ -115,7 +115,7 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
         Track *curTrack = conference->getTrack(trackIndex);
 		Session *curSessionOne = curTrack->getSession(sessionOne);
         Session *curSessionTwo = curTrack->getSession(sessionTwo);
-        int tempPaperId = curSessionTwo->getPaper(paperOne);
+        int tempPaperId = curSessionOne->getPaper(paperOne);
         curSessionOne->setPaper(paperOne, curSessionTwo->getPaper(paperTwo));
         curSessionTwo->setPaper(paperTwo, tempPaperId);
     }
