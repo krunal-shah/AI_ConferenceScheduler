@@ -56,6 +56,7 @@ void Session::setPaper ( int index, int paperId )
     else
     {
         cout << "Index out of bound - Session::setPaper" << endl;
+		system("pause");
         exit ( 0 );
     }
 }
