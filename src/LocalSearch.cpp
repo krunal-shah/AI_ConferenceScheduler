@@ -35,9 +35,48 @@ void printMap(vector<pair<int, double>> tmap)
 
 void LocalSearch::organizePapers ( )
 {
+	//initialised start state
     getStartState();
-    getStartState();
+
+	
 }
+
+
+void LocalSearch::transition()
+{
+	//considering costs for swapping two members in the same row, for every row, to constitute transition space
+	double bestcost = -100.0;
+	vector<int> best_results(4); //session1, page index1, session2, page index2
+
+	for (int i = 0; i < conference->getParallelTracks; i++)
+	{
+		//for every "row"
+		double scores[conference->getParallelTracks];
+		Track curtrack = this->conference->getTrack(i);
+		for (int j = 0; j < curtrack->sessionsInTrack-1; j++)
+		{//first session 
+			for (int k = j + 1; k < curtrack->sessionsInTrack; k++)
+			{//second session
+				for (int l = 0; l < papersInSession; l++)
+				{//compare cost of every paper of first session with second session 
+					for (int m = 0; m < papersInSession; m++)
+					{
+						double tempcost = scoreSwitch(curtrack, j, curtrack->getSession(j)->papers[l], k, curtrack->getSession(k)->papers[m]);
+						if (tempcost > bestcost)
+						{
+							best_results[0] = j;
+							best_results[1] = l;
+							best_results[2] = k;
+							best_results[3] = m;
+						}
+ 					}
+				}	
+			}
+		}
+	}
+}
+
+
 
 void LocalSearch::getStartState ( )
 {
