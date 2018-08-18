@@ -27,18 +27,17 @@ Conference::Conference ( Conference *baseConference )
     this->sessionsInTrack = baseConference->getSessionsInTrack();
     this->papersInSession = baseConference->getPapersInSession();
     initTracks ( parallelTracks, sessionsInTrack, papersInSession );
-    int paperCounter = 0;
-    for ( int i = 0; i < this->getSessionsInTrack ( ); i++ )
+    
+    for ( int i = 0; i < this->getParallelTracks ( ); i++ )
     {
         Track *baseTrack = baseConference->getTrack(i);
-        for ( int j = 0; j < this->getParallelTracks ( ); j++ )
+        for ( int j = 0; j < this->getSessionsInTrack ( ); j++ )
         {
             Session *baseSession = baseTrack->getSession(j);
             for ( int k = 0; k < this->getPapersInSession ( ); k++ )
             {
                 int basePaper = baseSession->getPaper(k);
-                this->setPaper ( j, i, k, basePaper );
-                paperCounter++;
+                this->setPaper ( i, j, k, basePaper );
             }
         }
     }
@@ -124,4 +123,24 @@ void Conference::printConference (char * filename )
     cout<<"Organization written to ";
     printf("%s :)\n",filename);
 
+}
+
+void Conference::printConferenceStdout ()
+{
+    for ( int i = 0; i < sessionsInTrack; i++ )
+    {
+        for ( int j = 0; j < parallelTracks; j++ )
+        {
+            for ( int k = 0; k < papersInSession; k++ )
+            {
+                cout << tracks[j].getSession ( i )->getPaper ( k ) << " ";
+            }
+            if ( j != parallelTracks - 1 )
+            {
+                cout <<"| ";
+            }
+        }
+        cout<<"\n";
+    }
+    cout<<"\n\n";
 }

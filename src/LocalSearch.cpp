@@ -36,6 +36,14 @@ void LocalSearch::organizePapers ( )
             }
         }
     }
+    system("pause");
+    Conference *newConference = new Conference(this->conference);
+    cout << "this conference is \n";
+    system("pause");
+    this->conference->printConferenceStdout();
+    
+    cout << "\ncopied conference is \n";
+    newConference->printConferenceStdout();
 }
 
 void LocalSearch::readInInputFile ( string filename )
