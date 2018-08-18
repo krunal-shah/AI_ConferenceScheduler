@@ -83,7 +83,7 @@ void LocalSearch::organizePapers ( )
 				cprob[counter++]=make_pair(elem.first, sum);
 			}
 
-			cout << "Printing cprob\n";
+			//cout << "Printing cprob\n";
 			printMap(cprob);
 			
 			//choose next randomly
