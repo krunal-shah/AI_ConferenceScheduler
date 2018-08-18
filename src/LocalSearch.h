@@ -79,13 +79,15 @@ public:
      * @return the score.
      */
     double scoreOrganization();
-    double LocalSearch::scoreOrganization ( Conference *conference );
+    double scoreOrganization ( Conference *conference );
 
-    double LocalSearch::scoreSwitch (int oldTrack, int oldSession, int newTrack, int newSession);
+    double scoreSwitch (int track, int sessionOne, int paperOne, int sessionTwo, int paperTwo);
     
-	void LocalSearch::getStartState ( );
+	void getStartState();
 
-	void LocalSearch::transition();
+	void updateState();
+
+	void transition();
     
     void printSessionOrganiser(char *);
 };
