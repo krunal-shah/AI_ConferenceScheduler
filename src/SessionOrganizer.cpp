@@ -24,18 +24,6 @@ SessionOrganizer::SessionOrganizer ( string filename )
 void SessionOrganizer::organizePapers ( )
 {
     search->organizePapers();
-    // int paperCounter = 0;
-    // for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
-    // {
-    //     for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
-    //     {
-    //         for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
-    //         {
-    //             conference->setPaper ( j, i, k, paperCounter );
-    //             paperCounter++;
-    //         }
-    //     }
-    // }
 }
 
 void SessionOrganizer::readInInputFile ( string filename )
@@ -68,8 +56,8 @@ void SessionOrganizer::readInInputFile ( string filename )
 
     processingTimeInMinutes = atof ( lines[0].c_str () );
     papersInSession = atoi ( lines[1].c_str () );
-    parallelTracks = atoi ( lines[2].c_str () );
-    sessionsInTrack = atoi ( lines[3].c_str () );
+    sessionsInTrack = atoi ( lines[2].c_str () );
+    parallelTracks = atoi ( lines[3].c_str () );
     tradeoffCoefficient = atof ( lines[4].c_str () );
 
     int n = lines.size ( ) - 5;
@@ -94,7 +82,7 @@ void SessionOrganizer::readInInputFile ( string filename )
     distanceMatrix = tempDistanceMatrix;
 
     int numberOfPapers = n;
-    int slots = parallelTracks * papersInSession*sessionsInTrack;
+    int slots = parallelTracks*papersInSession*sessionsInTrack;
     if ( slots != numberOfPapers )
     {
         cout << "More papers than slots available! slots:" << slots << " num papers:" << numberOfPapers << endl;

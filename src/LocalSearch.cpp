@@ -33,8 +33,13 @@ void printMap(vector<pair<int, double>> tmap)
 	cout << "end of map printing\n";
 }
 
-
 void LocalSearch::organizePapers ( )
+{
+    getStartState();
+    getStartState();
+}
+
+void LocalSearch::getStartState ( )
 {
 	//for one session: get papers
 	unordered_map<int, int> papers_avl;
@@ -155,8 +160,8 @@ void LocalSearch::readInInputFile ( string filename )
 
     processingTimeInMinutes = atof ( lines[0].c_str () );
     papersInSession = atoi ( lines[1].c_str () );
-    parallelTracks = atoi ( lines[2].c_str () );
-    sessionsInTrack = atoi ( lines[3].c_str () );
+    sessionsInTrack = atoi ( lines[2].c_str () );
+    parallelTracks = atoi ( lines[3].c_str () );
     tradeoffCoefficient = atof ( lines[4].c_str () );
 
     int n = lines.size ( ) - 5;
@@ -288,10 +293,9 @@ double LocalSearch::scoreOrganization ( )
                 int index1 = tmpSession1->getPaper ( k );
 
                 // Get competing papers.
-                for ( int l = i + 1; l < conference->getParallelTracks ( ); l++ )
+                for ( int l = j + 1; l < tmpTrack1->getNumberOfSessions ( ); l++ )
                 {
-                    Track* tmpTrack2 = conference->getTrack ( l );
-                    Session* tmpSession2 = tmpTrack2->getSession ( j );
+                    Session* tmpSession2 = tmpTrack1->getSession ( l );
                     for ( int m = 0; m < tmpSession2->getNumberOfPapers ( ); m++ )
                     {
                         int index2 = tmpSession2->getPaper ( m );

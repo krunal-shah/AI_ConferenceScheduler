@@ -105,15 +105,15 @@ void Conference::printConference (char * filename )
 {
     ofstream ofile(filename);
 
-    for ( int i = 0; i < sessionsInTrack; i++ )
+    for ( int i = 0; i < parallelTracks; i++ )
     {
-        for ( int j = 0; j < parallelTracks; j++ )
+        for ( int j = 0; j < sessionsInTrack; j++ )
         {
             for ( int k = 0; k < papersInSession; k++ )
             {
-                ofile<< tracks[j].getSession ( i )->getPaper ( k ) << " ";
+                ofile<< tracks[i].getSession ( j )->getPaper ( k ) << " ";
             }
-            if ( j != parallelTracks - 1 )
+            if ( j != sessionsInTrack - 1 )
             {
                 ofile<<"| ";
             }

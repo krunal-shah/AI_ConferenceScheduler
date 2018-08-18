@@ -78,8 +78,8 @@ public:
      */
     double scoreOrganization();
 
-    double scoreSwitch();
-    
+    double LocalSearch::scoreSwitch (int oldTrack, int oldSession, int newTrack, int newSession);
+    void LocalSearch::getStartState ( );
     
     void printSessionOrganiser(char *);
 };
