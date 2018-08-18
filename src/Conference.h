@@ -41,6 +41,8 @@ public:
     
     Conference(Conference* baseConference);
 
+	// void Conference::getPaper(int trackIndex, int sessionIndex, int paperIndex);
+
     /**
      * Initialize the tracks.
      * @param parallelTracks is the number of parallel tracks.

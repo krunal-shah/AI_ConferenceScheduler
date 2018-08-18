@@ -101,6 +101,22 @@ void Conference::setPaper ( int trackIndex, int sessionIndex, int paperIndex, in
     }
 }
 
+// void Conference::getPaper ( int trackIndex, int sessionIndex, int paperIndex)
+// {
+//     if ( this->parallelTracks > trackIndex )
+//     {
+//         Track *curTrack = &(tracks[trackIndex]);
+// 		Session *curSession = curTrack->getSession(sessionIndex);
+//         return curSession->getPaper(paperIndex);
+//     }
+//     else
+//     {
+//         cout << "Index out of bound - Conference::setPaper" << endl;
+// 		system("pause");
+//         exit ( 0 );
+//     }
+// }
+
 void Conference::printConference (char * filename )
 {
     ofstream ofile(filename);
