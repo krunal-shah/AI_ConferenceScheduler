@@ -88,9 +88,9 @@ void LocalSearch::organizePapers()
 
 void LocalSearch::updateState()
 {
-	delete bestState;
-	bestState = new Conference(conference);
-	bestScore = scoreOrganization(bestState);
+    delete bestState;
+    bestState = new Conference(conference);
+    bestScore = scoreOrganization(bestState);
 }
 
 void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
