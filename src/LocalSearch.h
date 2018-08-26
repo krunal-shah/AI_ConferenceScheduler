@@ -12,6 +12,7 @@
 #include <fstream>
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
 
 
 #include "Conference.h"
@@ -68,6 +69,12 @@ public:
 	void organizePapers();
 
 
+	/**
+	* AssignSchedule called in getStartState_X to assign determined schedule to conference
+	*/
+	void AssignSchedule(unordered_map<int, vector<int>>&);
+
+
     
     /**
      * Get the distance matrix.
@@ -81,12 +88,14 @@ public:
      * @return the score.
      */
     double scoreOrganization();
-    double scoreOrganization ( Conference *conference );
+	double scoreOrganization ( Conference *conference );
 
     double scoreSwitch (int track, int sessionOne, int paperOne, int sessionTwo, int paperTwo);
 
 
-	void getStartState ( );
+	void getStartState();
+	
+	void getStartState_weighted();
 
 	void computeBestTransition(vector<double>&);
 

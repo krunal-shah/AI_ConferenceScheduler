@@ -88,9 +88,9 @@ void LocalSearch::organizePapers()
 
 void LocalSearch::updateState()
 {
-    delete bestState;
-    bestState = new Conference(conference);
-    bestScore = scoreOrganization(bestState);
+	delete bestState;
+	bestState = new Conference(conference);
+	bestScore = scoreOrganization(bestState);
 }
 
 void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
@@ -147,13 +147,13 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
 void LocalSearch::computeBestTransition(vector<double> &best_results)
 {
 	//considering costs for swapping two members in the same row, for every row, to constitute transition space
-	double bestcost = -1000000000;
+	double bestcost = DBL_MIN;
 	best_results[0] = 0;
 	best_results[1] = 0;
 	best_results[2] = 0;
 	best_results[3] = 0;
 	best_results[4] = 0;
-	best_results[5] = -1000000000;
+	best_results[5] = DBL_MIN;
 
 	for (int i = 0; i < conference->getParallelTracks(); i++)
 	{
@@ -185,6 +185,125 @@ void LocalSearch::computeBestTransition(vector<double> &best_results)
 	}
 }
 
+void LocalSearch::AssignSchedule(unordered_map<int, vector<int>> &all_sessions)
+{
+	int sessCounter = 0;
+	for (int i = 0; i < conference->getParallelTracks(); i++)
+	{
+		for (int j = 0; j < conference->getSessionsInTrack(); j++)
+		{
+			//for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
+			int counter = 0;
+			for (auto& elem : all_sessions[sessCounter])
+			{
+				conference->setPaper(i, j, counter++, elem);
+			}
+			sessCounter++;
+		}
+	}
+	assert(sessCounter == all_sessions.size());
+}
+
+
+void LocalSearch::getStartState_weighted()
+{
+	//this is partially probabilistic greedy initialisation
+	unordered_set<int> papers_avl = this->all_papers;
+	unordered_map<int, vector<int>> all_sessions;
+	int sess_count = 0;
+	while (papers_avl.size())
+	{
+		//for every "row" (time-slot)
+		int random = rand() % papers_avl.size();
+		unordered_set<int>::const_iterator iter = papers_avl.begin();
+		advance(iter, random);
+		int first_ID = *iter;
+		papers_avl.erase(first_ID);
+		unordered_map <int, double> global_similarity;
+
+		//select first session considering similarity [greedy] 
+		vector<int> selected = { first_ID };
+		int firstID_next = -1; //firstID for second session
+		while (selected.size() < papersInSession)
+		{
+			double max_sim = DBL_MIN;
+			double min_sim = DBL_MAX;
+			int bestID = -1;
+
+			for (auto& availID : papers_avl)
+			{
+				global_similarity[availID] += (1.0 - distanceMatrix[selected.back()][availID]);
+				if (global_similarity[availID] > max_sim)
+				{
+					max_sim = global_similarity[availID];
+					bestID = availID;
+				}
+				if (global_similarity[availID] < min_sim)
+				{
+					min_sim = global_similarity[availID];
+					firstID_next = availID;
+				}
+			}
+			selected.push_back(bestID);
+			papers_avl.erase(bestID);
+			global_similarity.erase(bestID);
+		}
+		all_sessions[sess_count++] = selected;
+
+		//all following sess. in this row will weigh intra-cluster sim. with dissim. of all same-row previous clusters using "C" [greedy]	
+		while (sess_count%conference->getSessionsInTrack()) //assuming we interchanged getSessionsInTrack and getParallelTracks 
+		{
+			selected = { firstID_next };
+			papers_avl.erase(*selected.begin());
+			global_similarity.erase(firstID_next);
+			unordered_map <int, double> local_similarity;
+			double best_score;
+			int bestID;
+			double temp_score;
+			while (selected.size() < papersInSession)
+			{
+				best_score = DBL_MIN;
+				bestID = -1;
+				temp_score = 0;
+				for (auto& availID : papers_avl)
+				{
+					local_similarity[availID] += (1.0 - distanceMatrix[selected.back()][availID]);
+					temp_score = local_similarity[availID] - tradeoffCoefficient * global_similarity[availID];
+					if (temp_score > best_score)
+					{
+						best_score = temp_score;
+						bestID = availID;
+					}
+				}
+				//next best ID has been determined.
+				selected.push_back(bestID);
+				papers_avl.erase(bestID);
+				global_similarity.erase(bestID);
+				local_similarity.erase(bestID);
+			}
+			all_sessions[sess_count++] = selected;
+			//now, update global_similarity and find most dissimilar paperID (wrt to ALL previous clusters) [will be used as first_ID for following session]
+			double min_sim = DBL_MAX;
+			assert(local_similarity.size() == global_similarity.size());
+			for (auto & elem : global_similarity)
+			{
+				elem.second += local_similarity[elem.first];
+				if (elem.second < min_sim)
+				{
+					min_sim = elem.second;
+					firstID_next = elem.first;
+				}
+			}
+		}
+	}
+	//assign determined schedule to conference -
+	AssignSchedule(all_sessions);  //**ROW-WISE** assignment
+	cout << "Printing starting conference\n";
+	conference->printConferenceStdout();
+}
+
+
+
 void LocalSearch::getStartState()
 {
 	unordered_set<int> papers_avl = this->all_papers;
@@ -198,13 +317,13 @@ void LocalSearch::getStartState()
 	int first_ID = *iter;
 	while (papers_avl.size())
 	{
-		vector<int> selected = {first_ID}; //docID of first randomly-selected paper 
+		vector<int> selected = { first_ID }; //docID of first randomly-selected paper 
 		papers_avl.erase(*selected.begin());
 		unordered_map<int, double> similarity; //ID to (cumulative) similarity for one session
 		while (selected.size() < papersInSession) //make one session:
 		{
 			//similarities of rest available
-			double c = 0;	
+			double c = 0;
 			for (auto& availID : papers_avl)
 			{
 				similarity[availID] += (1.0 - distanceMatrix[selected.back()][availID]);
@@ -243,7 +362,7 @@ void LocalSearch::getStartState()
 		}
 		all_sessions[sess_count++] = selected;
 		//now, find the most dissimilar paperID from remaining wrt latest cluster [will be used as first_ID for following session]
-		double min_sim = DBL_MAX;	
+		double min_sim = DBL_MAX;
 		for (auto & elem : similarity)
 		{
 			if (elem.second < min_sim)
@@ -253,15 +372,15 @@ void LocalSearch::getStartState()
 			}
 		}
 	}
+
 	int sessCounter = 0;
 	for (int i = 0; i < conference->getSessionsInTrack(); i++)
 	{
 		for (int j = 0; j < conference->getParallelTracks(); j++)
 		{
-			vector<int> *sel = &all_sessions[sessCounter];
 			//for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
 			int counter = 0;
-			for (auto& elem : *sel)
+			for (auto& elem : all_sessions[sessCounter])
 			{
 				conference->setPaper(j, i, counter++, elem);
 			}
