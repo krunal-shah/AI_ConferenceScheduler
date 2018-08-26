@@ -196,7 +196,7 @@ void LocalSearch::AssignSchedule(unordered_map<int, vector<int>> &all_sessions)
 			int counter = 0;
 			for (auto& elem : all_sessions[sessCounter])
 			{
-				conference->setPaper(i, j, counter++, elem);
+				conference->setPaper(i, j, counter++, elem); //confirm i, j swap once!!!!
 			}
 			sessCounter++;
 		}
@@ -297,7 +297,7 @@ void LocalSearch::getStartState_weighted()
 		}
 	}
 	//assign determined schedule to conference -
-	AssignSchedule(all_sessions);  //**ROW-WISE** assignment
+	AssignSchedule(all_sessions);  //**ROW-WISE (time-slot wise)** assignment
 	cout << "Printing starting conference\n";
 	conference->printConferenceStdout();
 }
