@@ -7,7 +7,9 @@
 #define	UTIL_H
 
 #include<vector>
+#include<iostream>
 #include<unordered_map>
+#include<unordered_set>
 #include<assert.h>
 
 /**

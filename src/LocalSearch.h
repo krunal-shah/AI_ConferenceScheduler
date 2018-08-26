@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <unordered_set>
 
 
 #include "Conference.h"
@@ -35,6 +36,7 @@ public:
     int papersInSession ;
     int sessionsInTrack ;
 	int totalpapers;
+	unordered_set<int> all_papers; 
 	
     double currentScore;
     double bestScore;
