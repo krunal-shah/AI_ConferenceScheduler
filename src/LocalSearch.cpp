@@ -38,31 +38,58 @@ void printMap(vector<pair<int, double>> tmap)
 
 void LocalSearch::organizePapers()
 {
+	
 	// initialised start state
-	getStartState();
+	clock_t begin = clock();
+	getStartState_weighted();
+	//getStartState();
 	currentScore = scoreOrganization();
 	bestState = new Conference(conference);
 	bestScore = scoreOrganization(bestState);
 	// bestScore = currentScore;
 	cout << "Start state exited with score " << currentScore << endl;
+	/*getStartState();
+	currentScore = scoreOrganization();
+	bestState = new Conference(conference);
+	bestScore = scoreOrganization(bestState);*/
+
+	// bestScore = currentScore;
+	cout << "Start state exited with score " << currentScore << endl;
+	clock_t end = clock();
+	cout << "elapsed time:" << double(end - begin) / CLOCKS_PER_SEC<<endl;
 	system("pause");
+
+	// initialised start state
+	//clock_t end4 = clock();
+	//getStartState();
+	//currentScore = scoreOrganization();
+	//bestState = new Conference(conference);
+	//bestScore = scoreOrganization(bestState);
+	//// bestScore = currentScore;
+	//cout << "Start state exited with score " << currentScore << endl;
+	//clock_t end5 = clock();
+	//cout << "elapsed time:" << double(end5 - end4) / CLOCKS_PER_SEC << endl;
+	//system("pause");
+	
 	int stepsToClimb = (parallelTracks <= 8) ? pow(2 * parallelTracks, parallelTracks) : 1000000;
 	int tempStepsLimit = -1;
 	int stepNumber = 0;
 	vector<double> stepInfo(6);
-	cout << "Steps" << stepsToClimb << endl;
-	while (stepNumber < stepsToClimb)
+	cout << "Steps: " << stepsToClimb << endl;
+	//while (stepNumber < stepsToClimb)
+	int max_iter = 100;
+	while (max_iter--)
 	{
 		cout << "Computing step\n";
 		stepNumber++;
-		computeBestTransition(stepInfo);
+		computeBestTransition(stepInfo, tempStepsLimit);
 
-		cout << "Next step computed:\n";
+		/*cout << "Next step computed:\n";
 		cout << "time = " << stepInfo[4] << " change in score = " << stepInfo[5] << endl;
 		cout << "sessionOne = " << stepInfo[0] << " paperOne = " << stepInfo[1] << endl;
-		cout << "sessionTwo = " << stepInfo[2] << " paperTwo = " << stepInfo[3] << endl;
+		cout << "sessionTwo = " << stepInfo[2] << " paperTwo = " << stepInfo[3] << endl;*/
 
-		decideStep(stepInfo, tempStepsLimit);
+		//decideStep(stepInfo, tempStepsLimit);
 
 		if (tempStepsLimit > 0)
 		{
@@ -70,7 +97,9 @@ void LocalSearch::organizePapers()
 			if (tempStepsLimit == 0)
 				break;
 		}
+
 	}
+
 	bestScore = scoreOrganization(bestState);
 	// int paperCounter = 0;
 	// for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
@@ -91,9 +120,10 @@ void LocalSearch::updateState()
 	delete bestState;
 	bestState = new Conference(conference);
 	bestScore = scoreOrganization(bestState);
+	cout << "updated-state best score:" << bestScore << endl;
 }
 
-void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
+void LocalSearch::decideStep(vector<double> &stepInfo, int &tempStepsLimit)
 {
 	double bestStepScore = stepInfo[5];
 	int sessionOne = stepInfo[0];
@@ -104,8 +134,7 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
 
 	if (bestStepScore < 0)
 	{
-		tempStepsLimit = 10;
-
+		tempStepsLimit = 1;
 		Track *curTrack = conference->getTrack(trackIndex);
 		Session *curSessionOne = curTrack->getSession(sessionOne);
 		Session *curSessionTwo = curTrack->getSession(sessionTwo);
@@ -116,18 +145,17 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
 	else if (bestStepScore > 0)
 	{
 		tempStepsLimit = -1;
-
 		Track *curTrack = conference->getTrack(trackIndex);
 		Session *curSessionOne = curTrack->getSession(sessionOne);
 		Session *curSessionTwo = curTrack->getSession(sessionTwo);
 		int tempPaperId = curSessionOne->getPaper(paperOne);
 		curSessionOne->setPaper(paperOne, curSessionTwo->getPaper(paperTwo));
 		curSessionTwo->setPaper(paperTwo, tempPaperId);
+		cout<<"total score:"<<scoreOrganization()<<endl;
 	}
 	else
 	{
 		tempStepsLimit = 20;
-
 		Track *curTrack = conference->getTrack(trackIndex);
 		Session *curSessionOne = curTrack->getSession(sessionOne);
 		Session *curSessionTwo = curTrack->getSession(sessionTwo);
@@ -144,18 +172,20 @@ void LocalSearch::decideStep(vector<double> stepInfo, int &tempStepsLimit)
 	}
 }
 
-void LocalSearch::computeBestTransition(vector<double> &best_results)
+void LocalSearch::computeBestTransition(vector<double> &best_results, int &tempStepsLimit)
 {
 	//considering costs for swapping two members in the same row, for every row, to constitute transition space
-	double bestcost = DBL_MIN;
+	double bestcost = -DBL_MAX;
 	best_results[0] = 0;
 	best_results[1] = 0;
 	best_results[2] = 0;
 	best_results[3] = 0;
 	best_results[4] = 0;
-	best_results[5] = DBL_MIN;
+	best_results[5] = -DBL_MAX;
 
-	for (int i = 0; i < conference->getParallelTracks(); i++)
+	int i = 0;
+	//for (int i = 0; i < conference->getParallelTracks(); i++)
+	while (i<conference->getParallelTracks())
 	{
 		//for every "row"
 		Track *curtrack = this->conference->getTrack(i);
@@ -168,19 +198,33 @@ void LocalSearch::computeBestTransition(vector<double> &best_results)
 					for (int m = 0; m < papersInSession; m++)
 					{
 						double tempcost = scoreSwitch(i, j, l, k, m);
+						//cout << "tempcost:" << tempcost << endl;
 						if (tempcost > bestcost)
 						{
 							bestcost = tempcost;
-							best_results[0] = j;
-							best_results[1] = l;
-							best_results[2] = k;
-							best_results[3] = m;
-							best_results[4] = i;
-							best_results[5] = bestcost;
+							//cout << "updated bestcost: " << bestcost << endl;
+							best_results[0] = j; //first session index
+							best_results[1] = l; //first session paper index
+							best_results[2] = k; //second session index 
+							best_results[3] = m; //second session paper index
+							best_results[4] = i; //track ID 
+							best_results[5] = bestcost; //best cost
 						}
 					}
 				}
 			}
+		}
+		if (bestcost < 0)
+		{
+			cout << ":" << bestcost << endl;
+			i++;
+
+		}
+		else
+		{
+			cout << i << "/" << conference->getParallelTracks() <<":"<<bestcost<<endl;
+			decideStep(best_results, tempStepsLimit);
+			i++;
 		}
 	}
 }
@@ -211,6 +255,7 @@ void LocalSearch::getStartState_weighted()
 	unordered_set<int> papers_avl = this->all_papers;
 	unordered_map<int, vector<int>> all_sessions;
 	int sess_count = 0;
+	srand(time(NULL));
 	while (papers_avl.size())
 	{
 		//for every "row" (time-slot)
@@ -226,7 +271,7 @@ void LocalSearch::getStartState_weighted()
 		int firstID_next = -1; //firstID for second session
 		while (selected.size() < papersInSession)
 		{
-			double max_sim = DBL_MIN;
+			double max_sim = -DBL_MAX;
 			double min_sim = DBL_MAX;
 			int bestID = -1;
 
@@ -248,7 +293,7 @@ void LocalSearch::getStartState_weighted()
 			papers_avl.erase(bestID);
 			global_similarity.erase(bestID);
 		}
-		all_sessions[sess_count++] = selected;
+		all_sessions[sess_count++] = selected; //first session of row completed
 
 		//all following sess. in this row will weigh intra-cluster sim. with dissim. of all same-row previous clusters using "C" [greedy]	
 		while (sess_count%conference->getSessionsInTrack()) //assuming we interchanged getSessionsInTrack and getParallelTracks 
@@ -257,12 +302,12 @@ void LocalSearch::getStartState_weighted()
 			papers_avl.erase(*selected.begin());
 			global_similarity.erase(firstID_next);
 			unordered_map <int, double> local_similarity;
-			double best_score;
-			int bestID;
-			double temp_score;
+			double best_score=0;
+			int bestID=-1;
+			double temp_score=0;
 			while (selected.size() < papersInSession)
 			{
-				best_score = DBL_MIN;
+				best_score = -DBL_MAX;
 				bestID = -1;
 				temp_score = 0;
 				for (auto& availID : papers_avl)
@@ -271,11 +316,13 @@ void LocalSearch::getStartState_weighted()
 					temp_score = local_similarity[availID] - tradeoffCoefficient * global_similarity[availID];
 					if (temp_score > best_score)
 					{
+						//cout << "temp_score:" << temp_score << " best_score:" << best_score << endl;
 						best_score = temp_score;
 						bestID = availID;
 					}
 				}
 				//next best ID has been determined.
+				assert(bestID >= 0);
 				selected.push_back(bestID);
 				papers_avl.erase(bestID);
 				global_similarity.erase(bestID);
@@ -343,11 +390,11 @@ void LocalSearch::getStartState()
 					sum += elem.second / c;
 					cprob[counter++] = make_pair(elem.first, sum);
 				}
-				assert(sum == 1.0);
+				//assert(sum == 1.0);
 				//choose next randomly
 				//can be made faster -- how?
 				double r = ((double)rand() / (double)RAND_MAX);
-				cout << "Chose r = " << r << " " << endl;
+				//cout << "Chose r = " << r << " " << endl;
 				for (auto& elem : cprob)
 				{
 					if (elem.second > r)

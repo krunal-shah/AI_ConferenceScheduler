@@ -97,9 +97,9 @@ public:
 	
 	void getStartState_weighted();
 
-	void computeBestTransition(vector<double>&);
+	void computeBestTransition(vector<double>&, int &);
 
-    void LocalSearch::decideStep(vector<double>, int &);
+    void LocalSearch::decideStep(vector<double> &, int &);
 
     void updateState();
 
